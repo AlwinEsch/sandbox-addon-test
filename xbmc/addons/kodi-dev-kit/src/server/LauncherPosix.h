@@ -18,12 +18,15 @@ class CChildLauncherPosix : public CChildLauncher
 {
 public:
   CChildLauncherPosix();
+  ~CChildLauncherPosix();
 
-  bool Launch(const std::vector<std::string>& argv) override;
+  bool Launch(const std::vector<std::string>& argv, bool waitForExit) override;
   ChildStatus ProcessActive() override;
   bool Kill(bool wait) override;
 
 private:
+  void ProcessStatus(int status);
+
   pid_t m_pid = -1;
 };
 

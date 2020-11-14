@@ -18,6 +18,9 @@ namespace addon
 namespace sandbox
 {
 
+std::string CheckSandbox(int argc, char* argv[]);
+std::string CheckMainShared(int argc, char* argv[]);
+
 class CChildProcessor
 {
 public:

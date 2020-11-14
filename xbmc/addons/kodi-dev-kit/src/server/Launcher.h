@@ -27,6 +27,7 @@ enum class ChildStatus
   NotStarted,
   ExitedNormal,
   StoppedBySignal,
+  StoppedByUnknown,
   KilledFromOutside,
   SeqmentionFault,
 };
@@ -39,7 +40,7 @@ public:
 
   const std::string& GetIdentifier() const { return m_identifier; }
 
-  virtual bool Launch(const std::vector<std::string>& argv) = 0;
+  virtual bool Launch(const std::vector<std::string>& argv, bool waitForExit) = 0;
   virtual ChildStatus ProcessActive() = 0;
   virtual bool Kill(bool wait = true) = 0;
 

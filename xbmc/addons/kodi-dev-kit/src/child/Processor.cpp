@@ -15,6 +15,72 @@ namespace addon
 namespace sandbox
 {
 
+std::string CheckSandbox(int argc, char* argv[])
+{
+  const char* value = "--sandbox=";
+  std::string sandbox;
+
+  for (int i = 1; i < argc; ++i)
+  {
+    if (argv[i] == nullptr)
+      break;
+
+    std::string arg = argv[i];
+    if (arg.rfind(value, 0) == 0)
+    {
+      sandbox = arg.substr(strlen(value));
+      break;
+    }
+    else if ((arg == "-r") || (arg == "--sandbox"))
+    {
+      if (i + 1 < argc)  // Make sure we aren't at the end of argv!
+      {
+        sandbox = argv[++i]; // Increment 'i' so we don't get the argument as the next argv[i].
+        break;
+      }
+    }
+  }
+
+  if (sandbox.empty())
+  {
+    fprintf(stderr, "--sandbox option not set\n");
+  }
+  return sandbox;
+}
+
+std::string CheckMainShared(int argc, char* argv[])
+{
+  const char* value = "--main-shared=";
+  std::string main_shared;
+
+  for (int i = 1; i < argc; ++i)
+  {
+    if (argv[i] == nullptr)
+      break;
+
+    std::string arg = argv[i];
+    if (arg.rfind(value, 0) == 0)
+    {
+      main_shared = arg.substr(strlen(value));
+      break;
+    }
+    else if ((arg == "-m") || (arg == "--main-shared"))
+    {
+      if (i + 1 < argc)  // Make sure we aren't at the end of argv!
+      {
+        main_shared = argv[++i]; // Increment 'i' so we don't get the argument as the next argv[i].
+        break;
+      }
+    }
+  }
+
+  if (main_shared.empty())
+  {
+    fprintf(stderr, "--main-shared option not set\n");
+  }
+  return main_shared;
+}
+
 std::thread::id main_thread_id = std::this_thread::get_id();
 std::shared_ptr<addon::sandbox::CShareProcessReceiver> CChildProcessor::g_mainIn;
 std::shared_ptr<addon::sandbox::CShareProcessTransmitter> CChildProcessor::g_mainOut;

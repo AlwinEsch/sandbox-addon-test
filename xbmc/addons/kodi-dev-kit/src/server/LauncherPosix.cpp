@@ -62,7 +62,12 @@ CChildLauncherPosix::CChildLauncherPosix()
 
 }
 
-bool CChildLauncherPosix::Launch(const std::vector<std::string>& argv)
+CChildLauncherPosix::~CChildLauncherPosix()
+{
+  Kill(true);
+}
+
+bool CChildLauncherPosix::Launch(const std::vector<std::string>& argv, bool waitForExit)
 {
   using namespace std::chrono;
 
@@ -149,8 +154,19 @@ bool CChildLauncherPosix::Launch(const std::vector<std::string>& argv)
     return false;
   }
 
-  addon::utils::LOG_MESSAGE(ADDON_LOG_INFO, "CChildLauncherPosix::%s: Started child process for webbrowser addon (pid %i)", __func__, pid);
+  addon::utils::LOG_MESSAGE(ADDON_LOG_INFO, "CChildLauncherPosix::%s: Started child process for webbrowser addon (pid %i) in wait %s", __func__, pid, waitForExit ? "yes" : "no");
   m_pid = pid;
+
+  if (waitForExit)
+  {
+    int status = 0;
+    pid_t ret = HANDLE_EINTR(waitpid(pid, &status, 0));
+    if (ret <= 0)
+    {
+      ProcessStatus(status);
+      m_pid = pid;
+    }
+  }
 
   return true;
 }
@@ -169,43 +185,51 @@ ChildStatus CChildLauncherPosix::ProcessActive()
   else if (ret  < 0)
   {
     addon::utils::LOG_MESSAGE(ADDON_LOG_ERROR, "CChildLauncherPosix::%s: Asked sandbox process pid %i no more present", __func__, m_pid);
+    if (m_lastStatus == ChildStatus::Running)
+      m_lastStatus = ChildStatus::StoppedByUnknown;
     return m_lastStatus;
   }
   else
   {
-    if (WIFEXITED(status))
-    {
-      m_exitCode = WEXITSTATUS(status);
-      m_lastStatus = ChildStatus::ExitedNormal;
-      addon::utils::LOG_MESSAGE(ADDON_LOG_DEBUG, "CChildLauncherPosix::%s: Sandbox process pid %i, stopped normal with exit code %i", __func__, m_pid, m_exitCode);
-    }
-    else if (WIFSIGNALED(status))
-    {
-      m_exitCode = WTERMSIG(status);
-      if (m_exitCode == SIGSEGV)
-      {
-        m_lastStatus = ChildStatus::SeqmentionFault;
-        addon::utils::LOG_MESSAGE(ADDON_LOG_FATAL, "CChildLauncherPosix::%s: Sandbox process pid %i with seqmention fault", __func__, m_pid, m_exitCode);
-      }
-      else
-      {
-        m_lastStatus = ChildStatus::StoppedBySignal;
-        addon::utils::LOG_MESSAGE(ADDON_LOG_FATAL, "CChildLauncherPosix::%s: Sandbox process pid %i signaled with %i", __func__, m_pid, m_exitCode);
-      }
-    }
-    else if (WIFSTOPPED(status))
-    {
-      m_exitCode = WSTOPSIG(status);
-      m_lastStatus = ChildStatus::StoppedBySignal;
-      addon::utils::LOG_MESSAGE(ADDON_LOG_FATAL, "CChildLauncherPosix::%s: Sandbox process pid %i stopped from outside with %i", __func__, m_pid, m_exitCode);
-    }
-    else
-    {
-      addon::utils::LOG_MESSAGE(ADDON_LOG_FATAL, "CChildLauncherPosix::%s: Sandbox process pid %i stopped with unknown status %i", __func__, m_pid, status);
-    }
+    ProcessStatus(status);
   }
 
   return m_lastStatus;
+}
+
+void CChildLauncherPosix::ProcessStatus(int status)
+{
+  if (WIFEXITED(status))
+  {
+    m_exitCode = WEXITSTATUS(status);
+    m_lastStatus = ChildStatus::ExitedNormal;
+    addon::utils::LOG_MESSAGE(ADDON_LOG_DEBUG, "CChildLauncherPosix::%s: Sandbox process pid %i, stopped normal with exit code %i", __func__, m_pid, m_exitCode);
+  }
+  else if (WIFSIGNALED(status))
+  {
+    m_exitCode = WTERMSIG(status);
+    if (m_exitCode == SIGSEGV)
+    {
+      m_lastStatus = ChildStatus::SeqmentionFault;
+      addon::utils::LOG_MESSAGE(ADDON_LOG_FATAL, "CChildLauncherPosix::%s: Sandbox process pid %i with seqmention fault", __func__, m_pid, m_exitCode);
+    }
+    else
+    {
+      m_lastStatus = ChildStatus::StoppedBySignal;
+      addon::utils::LOG_MESSAGE(ADDON_LOG_FATAL, "CChildLauncherPosix::%s: Sandbox process pid %i signaled with %i", __func__, m_pid, m_exitCode);
+    }
+  }
+  else if (WIFSTOPPED(status))
+  {
+    m_exitCode = WSTOPSIG(status);
+    m_lastStatus = ChildStatus::StoppedBySignal;
+    addon::utils::LOG_MESSAGE(ADDON_LOG_FATAL, "CChildLauncherPosix::%s: Sandbox process pid %i stopped from outside with %i", __func__, m_pid, m_exitCode);
+  }
+  else
+  {
+    m_lastStatus = ChildStatus::StoppedByUnknown;
+    addon::utils::LOG_MESSAGE(ADDON_LOG_FATAL, "CChildLauncherPosix::%s: Sandbox process pid %i stopped with unknown status %i", __func__, m_pid, status);
+  }
 }
 
 bool CChildLauncherPosix::Kill(bool wait)
