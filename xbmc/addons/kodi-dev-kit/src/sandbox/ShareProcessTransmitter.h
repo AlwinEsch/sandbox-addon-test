@@ -16,12 +16,12 @@
 #include <string>
 #include <thread>
 
-class CSharedMemControl;
-
 namespace addon
 {
 namespace sandbox
 {
+
+class CSharedMemControl;
 
 class CShareProcessTransmitter
 {

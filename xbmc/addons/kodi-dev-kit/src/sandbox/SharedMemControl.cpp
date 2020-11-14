@@ -7,6 +7,11 @@
 
 #include "SharedMemControl.h"
 
+namespace addon
+{
+namespace sandbox
+{
+
 CSharedMemControl::CSharedMemControl(const std::string& identifier,
                                      size_t size /* = DEFAULT_SHARED_MEM_SIZE*/)
   : m_identifier(identifier),
@@ -41,3 +46,6 @@ void CSharedMemControl::SetInactive()
   if (m_sharedMem->sem_segment_active > 0)
     m_sharedMem->sem_segment_active--;
 }
+
+} /* namespace sandbox */
+} /* namespace addon */

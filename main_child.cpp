@@ -11,6 +11,11 @@ int main(int argc, char* argv[])
 {
   const std::string sandbox = addon::sandbox::CheckSandbox(argc, argv);
   const std::string main_shared = addon::sandbox::CheckMainShared(argc, argv);
+  if (sandbox.empty() || main_shared.empty())
+  {
+    fprintf(stderr, "%s called independent, this is a sandbox only and started by Kodi itself!\n", argv[0]);
+    return EXIT_FAILURE;
+  }
 
   addon::sandbox::CChildProcessor processor(main_shared, true);
 
@@ -32,5 +37,5 @@ int main(int argc, char* argv[])
 
   sleep(3);
 
-  return 0;
+  return EXIT_SUCCESS;
 }

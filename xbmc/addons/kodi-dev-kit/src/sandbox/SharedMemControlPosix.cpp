@@ -12,6 +12,11 @@
 #include <sys/file.h>
 #include <sys/mman.h>
 
+namespace addon
+{
+namespace sandbox
+{
+
 CSharedMemControlPosix::CSharedMemControlPosix(const std::string& identifier, size_t size/* = SHARED_DEFAULT_MEM_SIZE*/)
   : CSharedMemControl(identifier, size)
 {
@@ -162,3 +167,6 @@ bool CSharedMemControlPosix::InitSegment(int segment)
   m_sharedMem->sem_segments[segment].inited = true;
   return true;
 }
+
+} /* namespace sandbox */
+} /* namespace addon */

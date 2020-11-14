@@ -11,6 +11,11 @@
 
 #include <string>
 
+namespace addon
+{
+namespace sandbox
+{
+
 class CSharedMemControl
 {
 public:
@@ -44,3 +49,6 @@ private:
   const std::string m_identifier;
   const size_t m_sharedMemSize;
 };
+
+} /* namespace sandbox */
+} /* namespace addon */

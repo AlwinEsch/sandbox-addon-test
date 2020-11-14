@@ -9,6 +9,11 @@
 
 #include "SharedMemControl.h"
 
+namespace addon
+{
+namespace sandbox
+{
+
 class CSharedMemControlPosix : public CSharedMemControl
 {
 public:
@@ -28,3 +33,6 @@ public:
 private:
   int m_fd{-1};
 };
+
+} /* namespace sandbox */
+} /* namespace addon */

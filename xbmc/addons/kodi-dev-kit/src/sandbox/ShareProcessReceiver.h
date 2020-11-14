@@ -17,12 +17,12 @@
 #include <thread>
 #include <unordered_set>
 
-class CSharedMemControl;
-
 namespace addon
 {
 namespace sandbox
 {
+
+class CSharedMemControl;
 
 class CShareProcessReceiver
 {

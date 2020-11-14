@@ -41,10 +41,6 @@ std::string CheckSandbox(int argc, char* argv[])
     }
   }
 
-  if (sandbox.empty())
-  {
-    fprintf(stderr, "--sandbox option not set\n");
-  }
   return sandbox;
 }
 
@@ -74,10 +70,6 @@ std::string CheckMainShared(int argc, char* argv[])
     }
   }
 
-  if (main_shared.empty())
-  {
-    fprintf(stderr, "--main-shared option not set\n");
-  }
   return main_shared;
 }
 
